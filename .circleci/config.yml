@@ -3,15 +3,15 @@ version: 2
 jobs:
   build:
     docker:
-      - docker.io/avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG
-      - docker.io/avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG
+      - docker.io/avatarnewyork/dockerenv-apache:php71
+      - docker.io/avatarnewyork/dockerenv-mysql:percona56
 
     steps:
       - checkout
 
       - setup_remote_docker:
-           version: 17.05.0-ce
-
+          version: 17.05.0-ce
+          
       - run:
           name: Install Docker Compose (v1.2.0)
           command: |
@@ -19,7 +19,6 @@ jobs:
             curl -L https://github.com/docker/compose/releases/download/1.2.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
       
-           
       - run:
           name: Composer Up
           command: |
