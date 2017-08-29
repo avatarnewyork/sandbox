@@ -2,7 +2,5 @@ web:
   image: docker.io/avatarnewyork/dockerenv-apache:php71
   ports:
     - "8080:80"
-  links:
-    - db
   environment:
     POSTFIX_HOSTNAME: dev.avatarnewyork.com
