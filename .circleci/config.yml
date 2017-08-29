@@ -3,15 +3,15 @@ version: 2
 jobs:
   build:
     docker:
-      - docker.io/avatarnewyork/dockerenv-apache:php71
-      - docker.io/avatarnewyork/dockerenv-mysql:percona56
+      - image: docker.io/avatarnewyork/dockerenv-apache:php71
+      - image: docker.io/avatarnewyork/dockerenv-mysql:percona56
 
     steps:
+      
       - checkout
 
-      - setup_remote_docker:
-          version: 17.05.0-ce
-          
+      - setup_remote_docker
+      
       - run:
           name: Install Docker Compose (v1.2.0)
           command: |
