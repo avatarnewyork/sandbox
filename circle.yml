@@ -16,26 +16,27 @@ dependencies:
     - curl -L https://github.com/docker/compose/releases/download/1.2.0/docker-compose-`uname -s`-`uname -m` > ~/docker-compose
     - chmod +x ~/docker-compose
     - mkdir -p ~/docker
-    # dockerenv-apache php53
-    - if [[ ! -e ~/docker/dockerenv_apache.tar ]]; then docker pull "avatarnewyork/dockerenv-apache:php53" && docker save "avatarnewyork/dockerenv-apache:php53" > ~/docker/dockerenv_apache.tar; else docker load -i ~/docker/dockerenv_apache.tar; fi
-    # dockerenv-mysql mysql55
-    - if [[ ! -e ~/docker/dockerenv_mysql.tar ]]; then docker pull "avatarnewyork/dockerenv-mysql" && docker save "avatarnewyork/dockerenv-mysql" > ~/docker/dockerenv_mysql.tar; else docker load -i ~/docker/dockerenv_mysql.tar; fi
-    # drupal data / config
-    - cp ~/$CIRCLE_PROJECT_REPONAME/tests/config/settings.database.php ~/$CIRCLE_PROJECT_REPONAME/public/sites/default/
+    # dockerenv-apache:$DOCKERENV_APACHE_TAG 
+    - if [[ ! -e ~/docker/dockerenv_apache.tar ]]; then docker pull "docker.io/avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" && docker save "docker.io/avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" > ~/docker/dockerenv_apache.tar; else docker load -i ~/docker/dockerenv_apache.tar; fi
+    # dockerenv-mysql:$DOCKERENV_MYSQL_TAG
+    - if [[ ! -e ~/docker/dockerenv_mysql.tar ]]; then docker pull "docker.io/avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" && docker save "docker.io/avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" > ~/docker/dockerenv_mysql.tar; else docker load -i ~/docker/dockerenv_mysql.tar; fi
     # replace env vars for docker-compose.yml
-    - ./bin/docker-compose-helper.sh
-
+    - ./circle/bin/docker-compose-helper.sh
+    
 test:
-  post:
+  override:
     # docker up
-    - ~/docker-compose -f ~/$CIRCLE_PROJECT_REPONAME/tests/config/docker-compose.yml up -d
+    - ~/docker-compose -f ~/$CIRCLE_PROJECT_REPONAME/circle/config/docker-compose.yml up -d
+    # decrypt db if encrypted
+    - if [[ -f ~/$CIRCLE_PROJECT_REPONAME/data/db.sql.gz.enc ]]; then openssl aes-256-cbc -k "$OPENSSL_PASS" -in ~/$CIRCLE_PROJECT_REPONAME/data/db.sql.gz.enc -out ~/$CIRCLE_PROJECT_REPONAME/data/db.sql.gz -d; fi;
     # import db (sleep needed)
-    - sleep 40; zcat ~/$CIRCLE_PROJECT_REPONAME/tests/data/db.sql.gz | mysql -uadmin --password='admin' -P3366 -h127.0.0.1 test
+    - sleep 40; zcat ~/$CIRCLE_PROJECT_REPONAME/data/db.sql.gz | mysql -uadmin --password='admin' -P3366 -h127.0.0.1 test
+    # execute platform script (default drupal.sh)
+    - if [[ -z "$PLATFORM_SCRIPT" ]]; then PLATFORM_SCRIPT="drupal.sh"; fi; ~/$CIRCLE_PROJECT_REPONAME/circle/bin/$PLATFORM_SCRIPT
     # ngrock tunnel
-    - wget https://dl.ngrok.com/ngrok_2.0.17_linux_amd64.zip
-    - unzip ngrok_2.0.17_linux_amd64.zip
-    - ./ngrok authtoken $NGROK_TOKEN
-    - ./ngrok http -subdomain=$CIRCLE_SHA1 8080:
+    - unzip -d ~/ ~/$CIRCLE_PROJECT_REPONAME/circle/files/ngrok_2.0.19_linux_amd64.zip
+    - ~/ngrok authtoken $NGROK_TOKEN
+    - ~/ngrok http -subdomain=$CIRCLE_SHA1 8080:
         background: true
     # Wait for application and ngrok to be ready
     - curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
@@ -48,4 +49,4 @@ deployment:
     branch:
       - stage
     commands:
-      - ./bin/deploy.sh
+      - ./circle/bin/deploy.sh
