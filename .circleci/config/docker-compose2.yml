@@ -6,8 +6,3 @@ web:
     - db
   environment:
     POSTFIX_HOSTNAME: dev.avatarnewyork.com
-db:
-  image: docker.io/avatarnewyork/dockerenv-mysql:percona56
-  ports:
-    - "3366:3306"
-    
