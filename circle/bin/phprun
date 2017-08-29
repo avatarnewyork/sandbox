@@ -1,0 +1,104 @@
+#!/bin/bash
+
+# ------------------------------------------------------------------
+# phprun
+# phprun for dockerenv
+# ------------------------------------------------------------------
+
+SUBJECT=4fa81a22009860cd2b0d7a72994aa0b6d9efc2c7aklsdfasdfkjhasdfsdfh
+VERSION=0.1.0
+USAGE="Usage: phprun [-hv] [-t <latest|php53|php51>] <PROJECT> <FILE> [PARAMS]"
+
+# functions
+warn () {
+    echo "$0:" "$@" >&2
+}
+die () {
+    rc=$1
+    shift
+    warn "$@"
+    exit $rc
+}
+function contains() {
+    local n=$#
+    local value=${!n}
+    for ((i=1;i < $#;i++)) {
+        if [ "${!i}" == "${value}" ]; then
+            echo "y"
+            return 0
+        fi
+    }
+    echo "n"
+    return 1
+}
+
+
+# --- Option processing --------------------------------------------
+if [ $# == 0 ] ; then
+    echo $USAGE
+    exit 1;
+fi
+
+TAG="latest"
+
+while getopts ":vht" optname
+  do
+    case "$optname" in
+      "v")
+        echo "Version $VERSION"
+        exit 0;
+        ;;
+      "h")
+        echo $USAGE
+        exit 0;
+        ;;
+      "t")
+        TAG=$2
+        #exit 0;
+	shift
+        ;;
+      "?")
+        echo "Unknown option $OPTARG"
+        exit 0;
+        ;;
+      ":")
+        echo "No argument value for option $OPTARG"
+        exit 0;
+        ;;
+      *)
+        echo "Unknown error while processing options"
+        exit 0;
+        ;;
+    esac
+  done
+
+shift $(($OPTIND - 1))
+
+
+param1=$1
+param2=$2
+# -----------------------------------------------------------------
+
+
+# -----------------------------------------------------------------
+#trap "rm -f $LOCK_FILE" EXIT
+#touch $LOCK_FILE 
+
+# -----------------------------------------------------------------
+#  SCRIPT LOGIC GOES HERE
+# -----------------------------------------------------------------
+
+PROJECT=$1
+FILE=$2
+PARAMS=$3
+
+#MYSQL_PORT=`docker port ${PROJECT}_db_1 3306 | cut -d ":" -f2`
+##MYSQL_IP=`docker inspect ${PROJECT}_db_1 | grep IPAddress | cut -d '"' -f 4`
+#MYSQL_IP='10.2.0.10'
+
+# shift to pass php all remaining parameters
+shift
+shift
+
+#docker run --rm --user=apache -e DB_1_PORT_3306_TCP_PORT=$MYSQL_PORT -e DB_1_PORT_3306_TCP_ADDR=$MYSQL_IP -i -t -w /var/www/ --volumes-from ${PROJECT}_${PROJECT}_1 docker.io/avatarnewyork/dockerenv-apache:${TAG} docker-umask-wrapper.sh php $FILE $*
+docker run --user=apache -i -t -w /var/www/ --volumes-from ${PROJECT}_web_1 --link ${PROJECT}_db_1:db_1  docker.io/avatarnewyork/dockerenv-apache:${DOCKERENV_APACHE_TAG} docker-umask-wrapper.sh php $FILE $*
