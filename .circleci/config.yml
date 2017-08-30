@@ -24,9 +24,16 @@ jobs:
             set -x
             curl -L https://github.com/docker/compose/releases/download/1.2.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
-
+          
       - setup_remote_docker
 
+      - run:
+          name: Load / Populate Cache Images
+          command: |
+            mkdir -p ~/docker
+            if [[ ! -e ~/docker/dockerenv_apache.tar ]]; then docker pull "avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" && docker save "avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" > ~/docker/dockerenv_apache.tar; else docker load -i ~/docker/dockerenv_apache.tar; fi
+            if [[ ! -e ~/docker/dockerenv_mysql.tar ]]; then docker pull "avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" && docker save "avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" > ~/docker/dockerenv_mysql.tar; else docker load -i ~/docker/dockerenv_mysql.tar; fi
+    
       - run:
           name: Composer Up
           command: |
