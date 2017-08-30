@@ -1,5 +1,5 @@
 web:
-  image: avatarnewyork/dockerenv-apache:php71
+  image: avatarnewyork/dockerenv-apache:php7
   ports:
     - "8080:80"
   links:

@@ -44,7 +44,9 @@ jobs:
           name: Copy Project
           command: |
             docker cp /root/project config_web_1:/var/project
-            docker exec -ti config_web_1 cp -a /var/project/* /var/www/
+            docker exec -ti config_web_1 sh -c 'cp -a /var/project/* /var/www/'
+            docker exec -ti config_web_1 sh -c 'rmdir /var/www/html'
+            docker exec -ti config_web_1 sh -c 'mv /var/www/public /var/www/html'
             
       - run:
           name: Setup ngrok
