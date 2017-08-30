@@ -27,13 +27,22 @@ jobs:
           
       - setup_remote_docker
 
+      - restore_cache:
+          keys:
+            - docker-images
+    
       - run:
           name: Load / Populate Cache Images
           command: |
             mkdir -p ~/docker
             if [[ ! -e ~/docker/dockerenv_apache.tar ]]; then docker pull "avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" && docker save "avatarnewyork/dockerenv-apache:$DOCKERENV_APACHE_TAG" > ~/docker/dockerenv_apache.tar; else docker load -i ~/docker/dockerenv_apache.tar; fi
             if [[ ! -e ~/docker/dockerenv_mysql.tar ]]; then docker pull "avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" && docker save "avatarnewyork/dockerenv-mysql:$DOCKERENV_MYSQL_TAG" > ~/docker/dockerenv_mysql.tar; else docker load -i ~/docker/dockerenv_mysql.tar; fi
-    
+
+      - save_cache:
+          key: docker-images
+          paths:
+            - ~/docker
+                        
       - run:
           name: Composer Up
           command: |
