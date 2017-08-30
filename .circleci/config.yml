@@ -62,7 +62,7 @@ jobs:
           command: |
             docker cp /root/project/data/db.sql.gz.enc config_db_1:/root
             if [[ -f ~/project/data/db.sql.gz.enc ]]; then docker exec -ti config_db_1 openssl aes-256-cbc -k "$OPENSSL_PASS" -in ~/db.sql.gz.enc -out ~/db.sql.gz -d; fi
-            sleep 30; docker exec -ti config_db_1 sh -c 'zcat ~/db.sql.gz | mysql -uroot test'
+            sleep 40; docker exec -ti config_db_1 sh -c 'zcat ~/db.sql.gz | mysql -uroot test'
             
       - run:
           name: Setup ngrok
