@@ -31,3 +31,17 @@ jobs:
           command: |
             set -x
             docker-compose -f /root/project/.circleci/config/docker-compose2.yml up -d web
+
+      - run:
+          name: Setup ngrok
+          command: |
+            docker cp /root/project/.circleci/files/ngrok_2.0.19_linux_amd64.zip web:/root
+            docker exec -ti web unzip -d /root /root/ngrok_2.0.19_linux_amd64.zip
+
+      - run:
+          name: Start ngrok
+          command: |
+            docker exec -ti web ~/ngrok authtoken $NGROK_TOKEN
+            docker exec -ti web ~/ngrok http -subdomain=$CIRCLE_SHA1 8080:
+              background: true
+            docker exec -ti web curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
