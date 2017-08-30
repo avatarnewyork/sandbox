@@ -3,9 +3,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: busybox
-#      - image: avatarnewyork/dockerenv-apache:php71
-#      - image: avatarnewyork/dockerenv-mysql:percona56
+      - image: avatarnewyork/dockerenv-apache:php71
+      - image: avatarnewyork/dockerenv-mysql:percona56
 
     steps:      
       - checkout
