@@ -48,4 +48,4 @@ jobs:
       - run:
           name: Ghost Inspector Tests
           command: |
-            docker exec -ti -e CIRCLE_SHA1=$CIRCLE_SHA1 config_web_1 curl "https://api.ghostinspector.com/v1/suites/$GHOST_SUITE_ID/execute/?apiKey=$GHOST_API_KEY&startUrl=https://$CIRCLE_SHA1.ngrok.io" > $CIRCLE_ARTIFACTS/ghostinspector.json"
+            docker exec -ti -e CIRCLE_SHA1=$CIRCLE_SHA1 config_web_1 curl "https://api.ghostinspector.com/v1/suites/$GHOST_SUITE_ID/execute/?apiKey=$GHOST_API_KEY&startUrl=https://$CIRCLE_SHA1.ngrok.io" > $CIRCLE_ARTIFACTS/ghostinspector.json
