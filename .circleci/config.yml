@@ -35,15 +35,14 @@ jobs:
       - run:
           name: Setup ngrok
           command: |
-            docker cp /root/project/.circleci/files/ngrok_2.0.19_linux_amd64.zip config_web_1:/root
-            docker exec -ti config_web_1 unzip -d /root /root/ngrok_2.0.19_linux_amd64.zip
+            docker cp /root/project/.circleci/files/ngrok-stable-linux-amd64.zip config_web_1:/root
+            docker exec -ti config_web_1 unzip -d /root /root/ngrok-stable-linux-amd64.zip
 
       - run:
           name: Start ngrok
           command: |
             docker exec -ti config_web_1 ~/ngrok authtoken $NGROK_TOKEN
-            docker exec -ti config_web_1 ~/ngrok http -subdomain=$CIRCLE_SHA1 8080:
-              background: true
+            docker exec -ti config_web_1 ~/ngrok http -inspect=false -subdomain=$CIRCLE_SHA1 8080
             docker exec -ti config_web_1 curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
 
       - run:
