@@ -3,8 +3,9 @@ version: 2
 jobs:
   build:
     docker:
-      - image: avatarnewyork/dockerenv-apache:php71
-      - image: avatarnewyork/dockerenv-mysql:percona56
+       - image: centos:7
+#      - image: avatarnewyork/dockerenv-apache:php71
+#      - image: avatarnewyork/dockerenv-mysql:percona56
 
     steps:      
       - checkout
@@ -35,7 +36,8 @@ jobs:
       - run:
           name: Copy Project
           command: |
-            docker cp /root/project/* config_web_1:/var/www
+            docker cp /root/project config_web_1:/var/project
+            docker exec -ti config_web_1 cp -a /var/project/* /var/www/
             
       - run:
           name: Setup ngrok
