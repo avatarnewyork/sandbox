@@ -68,6 +68,8 @@ jobs:
             sleep 40; docker exec -ti config_db_1 sh -c 'zcat ~/db.sql.gz | mysql -uroot test'
             
   test-gi:
+    docker:
+       - image: centos:7    
     steps:
       - run:
           name: Setup ngrok
