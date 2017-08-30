@@ -10,7 +10,8 @@ jobs:
           name: Install Docker client
           command: |
             set -x
-            VER="17.03.0-ce"
+            #VER="17.03.0-ce"
+            VER=$DOCKER_VERSION
             curl -L -o /tmp/docker-$VER.tgz https://get.docker.com/builds/Linux/x86_64/docker-$VER.tgz
             tar -xz -C /tmp -f /tmp/docker-$VER.tgz
             mv /tmp/docker/* /usr/bin
@@ -22,7 +23,8 @@ jobs:
             curl -L https://github.com/docker/compose/releases/download/1.2.0/docker-compose-`uname -s`-`uname -m` > /usr/local/bin/docker-compose
             chmod +x /usr/local/bin/docker-compose
           
-      - setup_remote_docker
+      - setup_remote_docker:
+          version: $DOCKER_VERSION
     
       - restore_cache:
           keys:
@@ -65,6 +67,8 @@ jobs:
             if [[ -f ~/project/data/db.sql.gz.enc ]]; then docker exec -ti config_db_1 openssl aes-256-cbc -k "$OPENSSL_PASS" -in ~/db.sql.gz.enc -out ~/db.sql.gz -d; fi
             sleep 40; docker exec -ti config_db_1 sh -c 'zcat ~/db.sql.gz | mysql -uroot test'
             
+  test-gi:
+    steps:
       - run:
           name: Setup ngrok
           command: |
@@ -77,7 +81,7 @@ jobs:
             docker exec -ti config_web_1 ~/ngrok authtoken $NGROK_TOKEN
             docker exec -ti -e CIRCLE_SHA1=$CIRCLE_SHA1 config_web_1 ~/ngrok http -inspect=false -log=stdout -subdomain=$CIRCLE_SHA1.ngrok.io 80 > /dev/null &
             #docker exec -ti config_web_1 curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
-            
+      
       - run:
           name: Ghost Inspector Tests
           command: |
@@ -93,3 +97,7 @@ workflows:
     jobs:
       - build:
           context: org-global
+      - test-gi:
+          context: org-global
+          requires:
+            - build
