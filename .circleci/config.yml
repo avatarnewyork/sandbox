@@ -4,6 +4,7 @@ jobs:
   build:
     docker:
        - image: centos:7
+    context: org-global         
     steps:      
       - checkout
       - run:
@@ -69,7 +70,8 @@ jobs:
             
   test-gi:
     docker:
-       - image: centos:7    
+       - image: centos:7
+    context: org-global         
     steps:
       - run:
           name: Setup ngrok
@@ -98,8 +100,6 @@ workflows:
   build-test-deploy:
     jobs:
       - build:
-          context: org-global
       - test-gi:
-          context: org-global
           requires:
             - build
