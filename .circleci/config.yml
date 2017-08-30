@@ -3,8 +3,8 @@ version: 2
 jobs:
   build:
     docker:
-      - image: avatarnewyork/dockerenv-apache:php71
-      - image: avatarnewyork/dockerenv-mysql:percona56
+#      - image: avatarnewyork/dockerenv-apache:php71
+#      - image: avatarnewyork/dockerenv-mysql:percona56
 
     steps:      
       - checkout
@@ -35,13 +35,18 @@ jobs:
       - run:
           name: Setup ngrok
           command: |
-            docker cp /root/project/.circleci/files/ngrok_2.0.19_linux_amd64.zip web:/root
-            docker exec -ti web unzip -d /root /root/ngrok_2.0.19_linux_amd64.zip
+            docker cp /root/project/.circleci/files/ngrok_2.0.19_linux_amd64.zip config_web_1:/root
+            docker exec -ti config_web_1 unzip -d /root /root/ngrok_2.0.19_linux_amd64.zip
 
       - run:
           name: Start ngrok
           command: |
-            docker exec -ti web ~/ngrok authtoken $NGROK_TOKEN
-            docker exec -ti web ~/ngrok http -subdomain=$CIRCLE_SHA1 8080:
+            docker exec -ti config_web_1 ~/ngrok authtoken $NGROK_TOKEN
+            docker exec -ti config_web_1 ~/ngrok http -subdomain=$CIRCLE_SHA1 8080:
               background: true
-            docker exec -ti web curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
+            docker exec -ti config_web_1 curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
+
+      - run:
+          name: Ghost Inspector Tests
+          command: |
+            docker exec -ti config_web_1 curl curl "https://api.ghostinspector.com/v1/suites/$GHOST_SUITE_ID/execute/?apiKey=$GHOST_API_KEY&startUrl=https://$CIRCLE_SHA1.ngrok.io" > $CIRCLE_ARTIFACTS/ghostinspector.json"
