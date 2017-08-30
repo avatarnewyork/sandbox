@@ -92,8 +92,6 @@ workflows:
   version 2:
     build-test-deploy:
       - build:
-          context: org-global
       - test:
-          context: org-global
           requires:
             - build
