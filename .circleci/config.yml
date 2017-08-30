@@ -48,7 +48,7 @@ jobs:
             docker exec -ti config_web_1 sh -c 'rmdir /var/www/html'
             docker exec -ti config_web_1 sh -c 'mv /var/www/public /var/www/html'
 
-       - run:
+      - run:
           name: DB decrypt/import
           command: |
             if [[ -f ~/project/data/db.sql.gz.enc ]]; then docker exec -ti config_db_1 openssl aes-256-cbc -k "$OPENSSL_PASS" -in ~/db.sql.gz.enc -out ~/db.sql.gz -d; fi
