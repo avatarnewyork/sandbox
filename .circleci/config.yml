@@ -60,14 +60,13 @@ jobs:
             docker cp /root/project config_web_1:/var/project
             docker exec -ti config_web_1 sh -c 'cp -a /var/project/* /var/www/; rmdir /var/www/html; mv /var/www/public /var/www/html;'
 
-            
       - run:
           name: DB decrypt/import
           command: |
             docker cp /root/project/data/db.sql.gz.enc config_db_1:/root
             if [[ -f ~/project/data/db.sql.gz.enc ]]; then docker exec -ti config_db_1 openssl aes-256-cbc -k "$OPENSSL_PASS" -in ~/db.sql.gz.enc -out ~/db.sql.gz -d; fi
             sleep 40; docker exec -ti config_db_1 sh -c 'zcat ~/db.sql.gz | mysql -uroot test'
-            
+
       - run:
           name: Setup ngrok
           command: |
@@ -78,7 +77,7 @@ jobs:
           name: Start ngrok
           command: |
             docker exec -ti config_web_1 ~/ngrok authtoken $NGROK_TOKEN
-            docker exec -ti -e CIRCLE_SHA1=$CIRCLE_SHA1 config_web_1 ~/ngrok http -inspect=false -log=stdout -subdomain=$CIRCLE_SHA1.ngrok.io 80 > /dev/null &
+            docker exec -ti -e CIRCLE_SHA1=$CIRCLE_SHA1 config_web_1 ~/ngrok http -inspect=false -log=stdout -subdomain=$CIRCLE_SHA1 80 > /dev/null &
             #docker exec -ti config_web_1 curl --retry 10 --retry-delay 10 -v https://$CIRCLE_SHA1.ngrok.io
       
       - run:
